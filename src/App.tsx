@@ -44,15 +44,25 @@ function App() {
     } catch (err: any) {
       // Enhanced error handling for user-friendly messages
       if (err && err.response && err.response.status) {
-        if (err.response.status === 429) {
-          setError('We are experiencing temporary rate-limiting from YouTube. Please try again later or use a proxy.');
+        if (err.response.status === 503) {
+          if (detectedPlatform === 'youtube') {
+            setError('YouTube is temporarily blocking automated requests. This is a common issue that usually resolves itself. Please try again in a few minutes, or try a different YouTube video. Other video platforms continue to work normally.');
+          } else {
+            setError('This video service is temporarily unavailable. Please try again later.');
+          }
+        } else if (err.response.status === 429) {
+          setError('Rate limit exceeded. Please wait a moment before trying again.');
         } else if (err.response.status === 502) {
-          setError('There is a problem with the proxy connection. Please try again later.');
+          setError('Network connectivity issue. Please check your connection and try again.');
         } else {
-          setError('Failed to fetch video information. Please try again later.');
+          setError('Unable to process this video. Please check the URL and try again.');
         }
       } else {
-        setError('Failed to fetch video information. Please try again later.');
+        if (detectedPlatform === 'youtube') {
+          setError('YouTube access is currently restricted. This is a temporary technical limitation. Please try again later or use a different video platform.');
+        } else {
+          setError('Failed to fetch video information. Please check the URL and try again.');
+        }
       }
       setMetadata(null);
     } finally {
@@ -75,11 +85,19 @@ function App() {
                 Taf Video Downloader
               </span>
             </h1>
-            <p className={`text-xl ${themeObj.text.tertiary} mb-10 max-w-3xl mx-auto`}>
+            <p className={`text-xl ${themeObj.text.tertiary} mb-6 max-w-3xl mx-auto`}>
               The fast, simple tool for quick, hassle-free downloads from 
-              YouTube. Transform your offline video collection with this 
+              multiple video platforms. Transform your offline video collection with this 
               reliable and efficient downloader.
             </p>
+            <div className={`mb-10 max-w-3xl mx-auto text-sm ${themeObj.text.tertiary}`}>
+              <p className="mb-2">
+                <strong>Fully Supported:</strong> Twitter, Instagram, TikTok, Facebook, and other major platforms
+              </p>
+              <p>
+                <strong>YouTube:</strong> Currently experiencing technical restrictions. We're working to resolve these limitations.
+              </p>
+            </div>
             
             <div className="mb-8">
               <VideoUrlInput 
